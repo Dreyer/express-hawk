@@ -13,8 +13,8 @@ function getCredentials(id) {
 
 var ttlSec = 300; // 5 mins
 var url = 'http://www.example.org/foobar';
-var bewit = hawk.getToken(getCredentials(), url, ttlSec);
+var token = hawk.getToken(getCredentials(), url, ttlSec);
 
-url += '?bewit=' + bewit;
+url += '?' + hawk.TOKEN_KEY + '=' + token;
 
 console.log(url);

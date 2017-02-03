@@ -10,6 +10,7 @@ var assert = require('chai').assert;
 
 var middleware = require('../').getMiddleware;
 var token = require('../').getToken;
+var tokenKey = require('../').TOKEN_KEY;
 
 var credentials = {
     id: '1',
@@ -169,7 +170,7 @@ describe('middleware', function () {
     });
 
     it('should reject with bad request for invalid bewit', function (done) {
-        request.get(endpoint + '/require-session-bewit?bewit=foobar', function (err, res, body) {
+        request.get(endpoint + '/require-session-bewit?' + tokenKey + '=foobar', function (err, res, body) {
             if (err) done(err);
             assert.equal('400', res.statusCode);
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
@@ -183,7 +184,7 @@ describe('middleware', function () {
         var url = endpoint + '/require-session-bewit';
         var bewit = token(credentials, url, ttlSec);
 
-        url += '?bewit=' + bewit;
+        url += '?' + tokenKey + '=' + bewit;
 
         request.get(url, function (err, res, body) {
             if (err) done(err);
