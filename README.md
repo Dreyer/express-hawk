@@ -30,20 +30,12 @@ var port = 8081;
 var host = 'localhost';
 
 function getCredentials(id) {
-    var user = {
+    return {
         id: '1',
-        name: 'John Smith',
-        email: 'j.smith@example.org'
-    };
-
-    var credentials = {
-        id: id,
-        key: 'key',
+        key: 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn',
         algorithm: 'sha256',
-        user: user
+        user: 'steve'
     };
-
-    return credentials;
 }
 
 var authentication = hawk.getMiddleware({
