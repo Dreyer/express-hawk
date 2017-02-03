@@ -1,7 +1,6 @@
 "use strict";
 
 var express = require('express');
-//const hawk = require('express-hawk');
 var hawk = require('../');
 
 var app = express();
@@ -10,20 +9,12 @@ var port = 8081;
 var host = 'localhost';
 
 function getCredentials(id) {
-    var user = {
+    return {
         id: '1',
-        name: 'John Smith',
-        email: 'j.smith@example.org'
-    };
-
-    var credentials = {
-        id: id,
-        key: 'key',
+        key: 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn',
         algorithm: 'sha256',
-        user: user
+        user: 'steve'
     };
-
-    return credentials;
 }
 
 var authentication = hawk.getMiddleware({
@@ -34,7 +25,7 @@ var authentication = hawk.getMiddleware({
         // given token id. First argument of the callback is a potential
         // error.
 
-        let credentials = getCredentials(id);
+        var credentials = getCredentials(id);
 
         cb(null, credentials);
     },

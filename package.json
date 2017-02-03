@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node ./example",
     "test": "mocha",
-    "lint": "jshint ./lib"
+    "lint": "jshint ./lib ./example ./test"
   },
   "repository": {
     "type": "git",

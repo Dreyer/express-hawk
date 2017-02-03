@@ -1,4 +1,6 @@
 /* jshint expr: true */
+/* jshint maxlen: 200 */
+
 "use strict";
 
 var hawk = require('hawk');
@@ -7,42 +9,53 @@ var request = require('request');
 var assert = require('chai').assert;
 
 var middleware = require('../').getMiddleware;
-
-function getExistingSession(tokenId, cb) {
-    cb(null, { key: credentials.key, algorithm: 'sha256' });
-};
-
-function getNonExistingSession(tokenId, cb) {
-    cb(null, null);
-};
-
-function setSession(req, res, credentials, done) {
-    done();
-};
-
-function replyOK(req, res) {
-    res.status(200).json({ key: 'value' });
-};
-
-var app = express();
-var router = express.Router();
-
-router.get('/require-session', middleware({ getSession: getExistingSession, setSession: setSession }), replyOK);
-app.use('/router', router);
-
-app.post('/require-session', middleware({ getSession: getExistingSession, setSession: setSession }), replyOK);
-app.post('/require-invalid-session', middleware({ getSession: getNonExistingSession, setSession: setSession }), replyOK);
-
-app.get('/', function (req, res) {
-    res.send('hello world');
-});
+var token = require('../').getToken;
 
 var credentials = {
     id: '1',
     key: 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn',
     algorithm: 'sha256',
     user: 'mocha.js'
+};
+
+function getExistingSession(tokenId, cb) {
+    cb(null, { key: credentials.key, algorithm: 'sha256' });
 }
+
+function getNonExistingSession(tokenId, cb) {
+    cb(null, null);
+}
+
+function setSession(req, res, credentials, done) {
+    done();
+}
+
+function replyOK(req, res) {
+    res.status(200).json({ key: 'value' });
+}
+
+var app = express();
+var router = express.Router();
+
+router.get('/require-session', middleware({
+    getSession: getExistingSession,
+    setSession: setSession }), replyOK);
+
+app.use('/router', router);
+
+app.get('/require-session-bewit', middleware({
+    getSession: getExistingSession,
+    setSession: setSession }), replyOK);
+app.post('/require-session', middleware({
+    getSession: getExistingSession,
+    setSession: setSession }), replyOK);
+app.post('/require-invalid-session', middleware({
+    getSession: getNonExistingSession,
+    setSession: setSession }), replyOK);
+
+app.get('/', function (req, res) {
+    res.send('hello world');
+});
 
 var port = 8081;
 var host = 'localhost';
@@ -84,7 +97,7 @@ describe('middleware', function () {
             assert.equal('200', res.statusCode);
             assert.equal('hello world', body);
             done();
-        })
+        });
     });
 
     it('should challenge the client if no auth is provided', function (done) {
@@ -94,7 +107,7 @@ describe('middleware', function () {
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
             assert.equal('{"statusCode":401,"error":"Unauthorized"}', body);
             done();
-        })
+        });
     });
 
     it('should accept a valid hawk session', function (done) {
@@ -104,7 +117,7 @@ describe('middleware', function () {
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
             assert.equal('{"key":"value"}', body);
             done();
-        })
+        });
     });
 
     it('should accept a valid hawk session behind a router', function (done) {
@@ -114,7 +127,7 @@ describe('middleware', function () {
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
             assert.equal('{"key":"value"}', body);
             done();
-        })
+        });
     });
 
     it('should reject an invalid hawk session', function (done) {
@@ -124,7 +137,7 @@ describe('middleware', function () {
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
             assert.equal('{"statusCode":401,"error":"Unauthorized","message":"Unknown credentials","attributes":{"error":"Unknown credentials"}}', body);
             done();
-        })
+        });
     });
 
     it('should reject with bad request on malformed headers', function (done) {
@@ -142,6 +155,42 @@ describe('middleware', function () {
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
             assert.equal('{"statusCode":400,"error":"Bad Request","message":"Bad header format"}', body);
             done();
-        })
+        });
+    });
+
+    it('should reject with unauthorized with no bewit', function (done) {
+        request.get(endpoint + '/require-session-bewit?foo=bar', function (err, res, body) {
+            if (err) done(err);
+            assert.equal('401', res.statusCode);
+            assert.equal('application/json; charset=utf-8', res.headers['content-type']);
+            assert.equal('{"statusCode":401,"error":"Unauthorized"}', body);
+            done();
+        });
+    });
+
+    it('should reject with bad request for invalid bewit', function (done) {
+        request.get(endpoint + '/require-session-bewit?bewit=foobar', function (err, res, body) {
+            if (err) done(err);
+            assert.equal('400', res.statusCode);
+            assert.equal('application/json; charset=utf-8', res.headers['content-type']);
+            assert.equal('{"statusCode":400,"error":"Bad Request","message":"Invalid bewit structure"}', body);
+            done();
+        });
+    });
+
+    it('should create url with bewit', function (done) {
+        var ttlSec = 300; // 5 mins
+        var url = endpoint + '/require-session-bewit';
+        var bewit = token(credentials, url, ttlSec);
+
+        url += '?bewit=' + bewit;
+
+        request.get(url, function (err, res, body) {
+            if (err) done(err);
+            assert.equal('200', res.statusCode);
+            assert.equal('application/json; charset=utf-8', res.headers['content-type']);
+            assert.equal('{"key":"value"}', body);
+            done();
+        });
     });
 });
