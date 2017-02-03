@@ -1,0 +1,40 @@
+{
+  "name": "express-hawk",
+  "version": "0.1.0",
+  "description": "Hawk authentication middleware for the Express framework.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node ./example",
+    "test": "mocha",
+    "lint": "jshint ./lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dreyer/express-hawk.git"
+  },
+  "keywords": [
+    "hawk",
+    "express",
+    "authentication",
+    "middleware"
+  ],
+  "author": "Unit6 <team@unit6websites.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Dreyer/express-hawk/issues"
+  },
+  "homepage": "https://github.com/Dreyer/express-hawk#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "express": "^4.14.1",
+    "jshint": "^2.9.4",
+    "mocha": "^3.2.0",
+    "request": "^2.79.0"
+  },
+  "dependencies": {
+    "hawk": "^6.0.1"
+  }
+}
