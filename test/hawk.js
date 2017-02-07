@@ -36,6 +36,14 @@ function replyOK(req, res) {
 }
 
 var app = express();
+var sub = express();
+
+sub.get('/require-session', middleware({
+    getSession: getExistingSession,
+    setSession: setSession }), replyOK);
+
+app.use('/sub', sub); // mount the sub app
+
 var router = express.Router();
 
 router.get('/require-session', middleware({
@@ -113,6 +121,16 @@ describe('middleware', function () {
 
     it('should accept a valid hawk session', function (done) {
         request(getHawkOptions(endpoint + '/require-session', 'POST'), function (err, res, body) {
+            if (err) done(err);
+            assert.equal('200', res.statusCode);
+            assert.equal('application/json; charset=utf-8', res.headers['content-type']);
+            assert.equal('{"key":"value"}', body);
+            done();
+        });
+    });
+
+    it('should accept a valid hawk session for sub-app', function (done) {
+        request(getHawkOptions(endpoint + '/sub/require-session', 'GET'), function (err, res, body) {
             if (err) done(err);
             assert.equal('200', res.statusCode);
             assert.equal('application/json; charset=utf-8', res.headers['content-type']);
